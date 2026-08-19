@@ -166,6 +166,8 @@
 
     .row-label {
       font-size: .88rem;
+      min-width: 0;
+      overflow: hidden;
     }
     .row-label-text { line-height: 1.25; }
     .row-hint {
@@ -307,18 +309,17 @@
       align-items: center;
       gap: 2px;
       flex-shrink: 0;
-      flex-wrap: wrap;
-      max-width: 82px; /* force 5 dés sur 2 lignes si besoin */
+      flex-wrap: nowrap;
     }
     .dice-group svg {
       width: 22px;
       height: 22px;
       flex-shrink: 0;
     }
-    /* Pour les suites (5 dés) on réduit un peu */
+    /* Pour les suites (5 dés) on réduit pour tenir sur une ligne */
     .dice-group.suite svg {
-      width: 17px;
-      height: 17px;
+      width: 16px;
+      height: 16px;
     }
 
     @media (max-width: 360px) {
