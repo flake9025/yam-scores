@@ -200,6 +200,13 @@
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(143,78,29,.15);
     }
+    /* case non remplie : visuellement neutre */
+    select.empty {
+      color: var(--muted);
+      font-weight: 400;
+      background-color: #faf8f5;
+      border-style: dashed;
+    }
     /* couleur par joueur au focus */
     .col-p1 select:focus { border-color: var(--p1); box-shadow: 0 0 0 3px rgba(26,95,180,.15); }
     .col-p2 select:focus { border-color: var(--p2); box-shadow: 0 0 0 3px rgba(160,28,61,.15); }
@@ -322,7 +329,145 @@
       height: 16px;
     }
 
-    @media (max-width: 360px) {
+    /* ── Tour en cours – colonne active / inactive ──────────────── */
+
+    /* colonne inactive : grisée, non cliquable */
+    .col-p1.locked select,
+    .col-p2.locked select {
+      pointer-events: none;
+      opacity: .28;
+      border-style: dashed;
+      background-color: #f5f2ee;
+    }
+
+    /* colonne active : légère teinte de fond sur chaque row */
+    .turn-p1 .col-p1 select:not(:disabled),
+    .turn-p2 .col-p2 select:not(:disabled) {
+      border-style: solid;
+    }
+
+    /* surbrillance de la colonne active dans les totaux */
+    .turn-p1 #upper-p1,
+    .turn-p1 #lower-p1,
+    .turn-p1 #grand-p1 { box-shadow: inset 0 0 0 2px var(--p1); border-radius: 8px; }
+    .turn-p2 #upper-p2,
+    .turn-p2 #lower-p2,
+    .turn-p2 #grand-p2 { box-shadow: inset 0 0 0 2px var(--p2); border-radius: 8px; }
+
+    /* ── Bandeau de tour ─────────────────────────────────────────── */
+    #turn-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .6rem;
+      padding: .65rem .9rem;
+      border-radius: var(--radius-card);
+      font-weight: 700;
+      font-size: .95rem;
+      border: 2px solid;
+      transition: background .3s, border-color .3s, color .3s;
+    }
+    #turn-bar.turn-p1 {
+      background: var(--p1-light);
+      border-color: var(--p1);
+      color: var(--p1);
+    }
+    #turn-bar.turn-p2 {
+      background: var(--p2-light);
+      border-color: var(--p2);
+      color: var(--p2);
+    }
+    #turn-bar .turn-label { flex: 1; }
+    #turn-bar .turn-progress {
+      font-size: .72rem;
+      font-weight: 600;
+      opacity: .75;
+      white-space: nowrap;
+    }
+
+    /* ── Bouton Valider tour ─────────────────────────────────────── */
+    #btn-validate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
+      min-height: 52px;
+      border: none;
+      border-radius: var(--radius-btn);
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .15s, transform .1s;
+      color: #fff;
+    }
+    #btn-validate.turn-p1 { background: var(--p1); }
+    #btn-validate.turn-p2 { background: var(--p2); }
+    #btn-validate:active   { transform: scale(.97); }
+    #btn-validate:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Modale fin de partie ───────────────────────────────────── */
+    #end-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(35,29,18,.65);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      backdrop-filter: blur(3px);
+    }
+    #end-overlay.show { display: flex; }
+
+    #end-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 2rem 1.5rem 1.5rem;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,.3);
+      animation: pop .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    #end-card .end-trophy { font-size: 3.5rem; line-height: 1; margin-bottom: .5rem; }
+    #end-card h2 { font-size: 1.5rem; margin-bottom: .25rem; }
+    #end-card .end-sub { color: var(--muted); font-size: .9rem; margin-bottom: 1.25rem; }
+    .end-scores {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+    }
+    .end-score-box {
+      flex: 1;
+      border-radius: 16px;
+      padding: .85rem .5rem;
+      border: 2px solid;
+    }
+    .end-score-box.p1 { background: var(--p1-light); border-color: var(--p1); color: var(--p1); }
+    .end-score-box.p2 { background: var(--p2-light); border-color: var(--p2); color: var(--p2); }
+    .end-score-box.winner { border-width: 3px; }
+    .end-score-box .esb-name { font-size: .8rem; font-weight: 600; margin-bottom: .2rem; }
+    .end-score-box .esb-pts  { font-size: 2rem; font-weight: 800; line-height: 1; }
+    #btn-play-again {
+      width: 100%;
+      min-height: 50px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
       .score-row   { grid-template-columns: 1fr 76px 76px; gap: .25rem; padding: .45rem .6rem; }
       .players-header { grid-template-columns: 1fr 76px 76px; }
       select       { font-size: .82rem; }
@@ -393,7 +538,33 @@
     </div>
   </header>
 
+  <!-- ── Modale fin de partie ─────────────────────────────────── -->
+  <div id="end-overlay" role="dialog" aria-modal="true" aria-labelledby="end-title">
+    <div id="end-card">
+      <div class="end-trophy" aria-hidden="true">🏆</div>
+      <h2 id="end-title">Partie terminée !</h2>
+      <p class="end-sub" id="end-sub"></p>
+      <div class="end-scores">
+        <div class="end-score-box p1" id="end-box-p1">
+          <div class="esb-name" id="end-name-p1">Joueur 1</div>
+          <div class="esb-pts"  id="end-pts-p1">0</div>
+        </div>
+        <div class="end-score-box p2" id="end-box-p2">
+          <div class="esb-name" id="end-name-p2">Joueur 2</div>
+          <div class="esb-pts"  id="end-pts-p2">0</div>
+        </div>
+      </div>
+      <button id="btn-play-again" type="button">Nouvelle partie</button>
+    </div>
+  </div>
+
   <main>
+
+    <!-- ── Bandeau de tour ──────────────────────────────────────── -->
+    <div id="turn-bar" class="turn-p1" role="status" aria-live="polite">
+      <span class="turn-label" id="turn-label">Au tour de Joueur 1</span>
+      <span class="turn-progress" id="turn-progress">0 / 12 cases</span>
+    </div>
 
     <!-- ── Noms des joueurs ──────────────────────────────────────── -->
     <div class="players-header" role="group" aria-label="Noms des joueurs">
@@ -423,12 +594,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 1">
-            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            <option value="" selected>–</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 1">
-            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            <option value="" selected>–</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
           </select>
         </div>
       </div>
@@ -442,12 +613,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 2">
-            <option>0</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option>
+            <option value="" selected>–</option><option>0</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 2">
-            <option>0</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option>
+            <option value="" selected>–</option><option>0</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option>
           </select>
         </div>
       </div>
@@ -461,12 +632,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 3">
-            <option>0</option><option>3</option><option>6</option><option>9</option><option>12</option><option>15</option>
+            <option value="" selected>–</option><option>0</option><option>3</option><option>6</option><option>9</option><option>12</option><option>15</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 3">
-            <option>0</option><option>3</option><option>6</option><option>9</option><option>12</option><option>15</option>
+            <option value="" selected>–</option><option>0</option><option>3</option><option>6</option><option>9</option><option>12</option><option>15</option>
           </select>
         </div>
       </div>
@@ -480,12 +651,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 4">
-            <option>0</option><option>4</option><option>8</option><option>12</option><option>16</option><option>20</option>
+            <option value="" selected>–</option><option>0</option><option>4</option><option>8</option><option>12</option><option>16</option><option>20</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 4">
-            <option>0</option><option>4</option><option>8</option><option>12</option><option>16</option><option>20</option>
+            <option value="" selected>–</option><option>0</option><option>4</option><option>8</option><option>12</option><option>16</option><option>20</option>
           </select>
         </div>
       </div>
@@ -499,12 +670,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 5">
-            <option>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 5">
-            <option>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option>
           </select>
         </div>
       </div>
@@ -518,12 +689,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 6">
-            <option>0</option><option>6</option><option>12</option><option>18</option><option>24</option><option>30</option>
+            <option value="" selected>–</option><option>0</option><option>6</option><option>12</option><option>18</option><option>24</option><option>30</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 6">
-            <option>0</option><option>6</option><option>12</option><option>18</option><option>24</option><option>30</option>
+            <option value="" selected>–</option><option>0</option><option>6</option><option>12</option><option>18</option><option>24</option><option>30</option>
           </select>
         </div>
       </div>
@@ -543,12 +714,12 @@
         <span class="row-label">Brelan <span class="row-hint">3 dés identiques</span></span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Brelan">
-            <option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>25</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Brelan">
-            <option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>25</option>
           </select>
         </div>
       </div>
@@ -566,12 +737,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Petite suite">
-            <option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>25</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Petite suite">
-            <option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>25</option>
           </select>
         </div>
       </div>
@@ -589,12 +760,12 @@
         </span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Grande suite">
-            <option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>25</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Grande suite">
-            <option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>25</option>
           </select>
         </div>
       </div>
@@ -603,12 +774,12 @@
         <span class="row-label">Full <span class="row-hint">brelan + paire</span></span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Full">
-            <option>0</option><option>30</option>
+            <option value="" selected>–</option><option>0</option><option>30</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Full">
-            <option>0</option><option>30</option>
+            <option value="" selected>–</option><option>0</option><option>30</option>
           </select>
         </div>
       </div>
@@ -617,12 +788,12 @@
         <span class="row-label">Carré <span class="row-hint">4 dés identiques</span></span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Carré">
-            <option>0</option><option>40</option>
+            <option value="" selected>–</option><option>0</option><option>40</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Carré">
-            <option>0</option><option>40</option>
+            <option value="" selected>–</option><option>0</option><option>40</option>
           </select>
         </div>
       </div>
@@ -631,12 +802,12 @@
         <span class="row-label">Yam ! <span class="row-hint">5 dés identiques</span></span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Yam">
-            <option>0</option><option>50</option>
+            <option value="" selected>–</option><option>0</option><option>50</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Yam">
-            <option>0</option><option>50</option>
+            <option value="" selected>–</option><option>0</option><option>50</option>
           </select>
         </div>
       </div>
@@ -657,8 +828,17 @@
       </div>
     </div>
 
-    <!-- ── Bandeau gagnant ──────────────────────────────────────── -->
+    <!-- ── Bandeau score en cours ───────────────────────────────── -->
     <div id="winner-banner" role="status" aria-live="polite"></div>
+
+    <!-- ── Valider le tour ──────────────────────────────────────── -->
+    <button id="btn-validate" class="turn-p1" type="button" disabled>
+      Valider mon tour
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </button>
 
     <!-- ── Reset ────────────────────────────────────────────────── -->
     <button class="btn-reset" id="btn-reset" type="button">
@@ -687,26 +867,62 @@
 
   <script>
     // ── Références DOM ───────────────────────────────────────────
-    const nameP1   = document.getElementById('name-p1');
-    const nameP2   = document.getElementById('name-p2');
-    const upperP1  = document.getElementById('upper-p1');
-    const upperP2  = document.getElementById('upper-p2');
-    const lowerP1  = document.getElementById('lower-p1');
-    const lowerP2  = document.getElementById('lower-p2');
-    const grandP1  = document.getElementById('grand-p1');
-    const grandP2  = document.getElementById('grand-p2');
-    const banner   = document.getElementById('winner-banner');
+    const nameP1        = document.getElementById('name-p1');
+    const nameP2        = document.getElementById('name-p2');
+    const upperP1       = document.getElementById('upper-p1');
+    const upperP2       = document.getElementById('upper-p2');
+    const lowerP1       = document.getElementById('lower-p1');
+    const lowerP2       = document.getElementById('lower-p2');
+    const grandP1       = document.getElementById('grand-p1');
+    const grandP2       = document.getElementById('grand-p2');
+    const banner        = document.getElementById('winner-banner');
+    const turnBar       = document.getElementById('turn-bar');
+    const turnLabel     = document.getElementById('turn-label');
+    const turnProgress  = document.getElementById('turn-progress');
+    const btnValidate   = document.getElementById('btn-validate');
+    const endOverlay    = document.getElementById('end-overlay');
+    const endSub        = document.getElementById('end-sub');
+    const endBoxP1      = document.getElementById('end-box-p1');
+    const endBoxP2      = document.getElementById('end-box-p2');
+    const endNameP1     = document.getElementById('end-name-p1');
+    const endNameP2     = document.getElementById('end-name-p2');
+    const endPtsP1      = document.getElementById('end-pts-p1');
+    const endPtsP2      = document.getElementById('end-pts-p2');
+    const scoreArea     = document.querySelector('main');
 
-    // ── Calcul ───────────────────────────────────────────────────
+    // ── État du jeu ───────────────────────────────────────────────
+    // currentPlayer : 1 ou 2
+    let currentPlayer = 1;
+    // combien de cases le joueur actif a remplies CE tour
+    let filledThisTurn = 0;
+
+    // ── Helpers ───────────────────────────────────────────────────
+    function val(s)  { return s.value === '' ? 0 : Number(s.value); }
+    function name(p) { return (p === 1 ? nameP1 : nameP2).value || `Joueur ${p}`; }
+
+    function selectsOf(player) {
+      return [...document.querySelectorAll(`select[data-player="${player}"]`)];
+    }
+    function allSelects() {
+      return [...document.querySelectorAll('select')];
+    }
+
+    // Cases remplies (valeur ≠ '') pour un joueur
+    function filledCount(player) {
+      return selectsOf(player).filter(s => s.value !== '').length;
+    }
+    // Total de cases par joueur (12)
+    const TOTAL_CASES = 12;
+
+    // ── Calcul des totaux ─────────────────────────────────────────
     function sumPlayer(player, group) {
       return [...document.querySelectorAll(
         `select[data-player="${player}"][data-group="${group}"]`
-      )].reduce((acc, s) => acc + Number(s.value), 0);
+      )].reduce((acc, s) => acc + val(s), 0);
     }
 
     function highlight(outA, outB) {
-      const a = Number(outA.value);
-      const b = Number(outB.value);
+      const a = Number(outA.value), b = Number(outB.value);
       outA.classList.toggle('is-winning', a > b);
       outA.classList.toggle('is-losing',  a < b);
       outB.classList.toggle('is-winning', b > a);
@@ -714,9 +930,11 @@
     }
 
     function updateTotals() {
-      const u1 = sumPlayer(1, 'upper'), u2 = sumPlayer(2, 'upper');
-      const l1 = sumPlayer(1, 'lower'), l2 = sumPlayer(2, 'lower');
-      const g1 = u1 + l1,              g2 = u2 + l2;
+      allSelects().forEach(s => s.classList.toggle('empty', s.value === ''));
+
+      const u1 = sumPlayer(1,'upper'), u2 = sumPlayer(2,'upper');
+      const l1 = sumPlayer(1,'lower'), l2 = sumPlayer(2,'lower');
+      const g1 = u1+l1,               g2 = u2+l2;
 
       upperP1.value = u1; upperP2.value = u2;
       lowerP1.value = l1; lowerP2.value = l2;
@@ -726,40 +944,171 @@
       highlight(lowerP1, lowerP2);
       highlight(grandP1, grandP2);
 
-      // Bandeau gagnant — s'affiche seulement si au moins un score saisi
-      const anyFilled = [...document.querySelectorAll('select')]
-        .some(s => s.value !== '0');
-
+      // Bandeau intermédiaire (uniquement si des scores ont été saisis)
+      const anyFilled = allSelects().some(s => s.value !== '');
       if (anyFilled && g1 !== g2) {
-        const winner = g1 > g2 ? nameP1.value : nameP2.value;
-        const diff   = Math.abs(g1 - g2);
-        banner.textContent = `🥇 ${winner} mène avec ${Math.max(g1,g2)} pts (+${diff})`;
+        const winner = g1 > g2 ? name(1) : name(2);
+        banner.textContent = `🥇 ${winner} mène – ${Math.max(g1,g2)} pts (+${Math.abs(g1-g2)})`;
+        banner.classList.add('show');
+      } else if (anyFilled) {
+        banner.textContent = `🤝 Égalité – ${g1} pts chacun`;
         banner.classList.add('show');
       } else {
         banner.classList.remove('show');
-        if (anyFilled && g1 === g2) {
-          banner.textContent = `🤝 Égalité – ${g1} pts chacun`;
-          banner.classList.add('show');
-        }
       }
+
+      return { g1, g2 };
     }
 
-    // ── Événements ───────────────────────────────────────────────
-    document.querySelectorAll('select').forEach(s => {
-      s.addEventListener('change', updateTotals);
+    // ── Appliquer verrous (colonne inactive non cliquable) ────────
+    function applyLocks() {
+      const inactive = currentPlayer === 1 ? 2 : 1;
+      document.querySelectorAll(`.col-p${currentPlayer}`).forEach(d => d.classList.remove('locked'));
+      document.querySelectorAll(`.col-p${inactive}`).forEach(d => d.classList.add('locked'));
+
+      // Désactiver uniquement les cases déjà validées (disabled) du joueur actif
+      // Les cases vides restent librement accessibles pour qu'il puisse choisir
+      selectsOf(currentPlayer).forEach(s => {
+        if (s.value !== '' && !s.disabled) s.disabled = true; // sécurité
+      });
+    }
+
+    // ── Mettre à jour le bandeau de tour ──────────────────────────
+    function updateTurnBar() {
+      const p    = currentPlayer;
+      const done = filledCount(p);
+      turnBar.className   = `turn-p${p}`;
+      btnValidate.className = `turn-p${p}`;
+      turnLabel.textContent = `🎲 Au tour de ${name(p)}`;
+      turnProgress.textContent = `${done} / ${TOTAL_CASES} cases`;
+
+      // Le bouton Valider est actif seulement si le joueur a rempli
+      // au moins 1 case DE PLUS qu'au début de son tour
+      btnValidate.disabled = (filledThisTurn === 0);
+
+      // Classe sur le score area pour le surlignage CSS
+      scoreArea.classList.toggle('turn-p1', p === 1);
+      scoreArea.classList.toggle('turn-p2', p === 2);
+    }
+
+    // ── Passer au joueur suivant ──────────────────────────────────
+    function nextTurn() {
+      currentPlayer = currentPlayer === 1 ? 2 : 1;
+      filledThisTurn = 0;
+      applyLocks();
+      updateTurnBar();
+      // Scroll en haut pour que le joueur suivant voie bien son tour
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Fin de partie ─────────────────────────────────────────────
+    function checkEndGame() {
+      const allFilled = allSelects().every(s => s.value !== '');
+      if (!allFilled) return false;
+
+      const { g1, g2 } = updateTotals();
+      endNameP1.textContent = name(1);
+      endNameP2.textContent = name(2);
+      endPtsP1.textContent  = g1;
+      endPtsP2.textContent  = g2;
+
+      if (g1 > g2) {
+        endSub.textContent = `🥇 ${name(1)} remporte la partie !`;
+        endBoxP1.classList.add('winner');
+        endBoxP2.classList.remove('winner');
+        document.querySelector('#end-card .end-trophy').textContent = '🏆';
+      } else if (g2 > g1) {
+        endSub.textContent = `🥇 ${name(2)} remporte la partie !`;
+        endBoxP2.classList.add('winner');
+        endBoxP1.classList.remove('winner');
+        document.querySelector('#end-card .end-trophy').textContent = '🏆';
+      } else {
+        endSub.textContent = `🤝 Égalité parfaite – ${g1} pts chacun !`;
+        endBoxP1.classList.remove('winner');
+        endBoxP2.classList.remove('winner');
+        document.querySelector('#end-card .end-trophy').textContent = '🤝';
+      }
+
+      endOverlay.classList.add('show');
+      return true;
+    }
+
+    // ── Réinitialiser ─────────────────────────────────────────────
+    function resetGame() {
+      allSelects().forEach(s => {
+        s.value = '';
+        s.selectedIndex = 0;
+        s.disabled = false;
+      });
+      document.querySelectorAll('.col-p1, .col-p2').forEach(d => d.classList.remove('locked'));
+      currentPlayer  = 1;
+      filledThisTurn = 0;
+      endOverlay.classList.remove('show');
+      updateTotals();
+      applyLocks();
+      updateTurnBar();
+    }
+
+    // ── Événements selects ────────────────────────────────────────
+    allSelects().forEach(s => {
+      s.addEventListener('change', () => {
+        const p = parseInt(s.dataset.player);
+        // On ne réagit qu'aux selects du joueur actif
+        if (p !== currentPlayer) return;
+
+        if (s.value !== '') {
+          // Le joueur a choisi une valeur sur cette case :
+          // remettre toutes ses AUTRES cases vides à "–"
+          // (une seule case en cours à la fois, mais il peut changer d'avis)
+          selectsOf(currentPlayer).forEach(other => {
+            if (other !== s && other.value === '') {
+              // déjà vide, rien à faire
+            } else if (other !== s && !other.disabled) {
+              // case non encore validée d'un tour précédent → impossible
+              // (les cases déjà jouées sont disabled, donc on ne les touche pas)
+            }
+          });
+          // Retirer la valeur des autres cases non encore verrouillées
+          selectsOf(currentPlayer).forEach(other => {
+            if (other !== s && !other.disabled) {
+              other.value = '';
+              other.selectedIndex = 0;
+            }
+          });
+          filledThisTurn = 1;
+        } else {
+          // Le joueur a repassé sa case à "–" : annulation
+          filledThisTurn = 0;
+        }
+
+        updateTotals();
+        updateTurnBar();
+      });
     });
 
-    // Mise à jour du bandeau si on renomme un joueur
-    nameP1.addEventListener('input', updateTotals);
-    nameP2.addEventListener('input', updateTotals);
+    // ── Valider le tour ───────────────────────────────────────────
+    btnValidate.addEventListener('click', () => {
+      // Verrouiller définitivement la case choisie ce tour
+      selectsOf(currentPlayer).forEach(s => {
+        if (s.value !== '') s.disabled = true;
+      });
+      if (checkEndGame()) return;
+      nextTurn();
+    });
 
+    // ── Nouvelle partie ───────────────────────────────────────────
     document.getElementById('btn-reset').addEventListener('click', () => {
       if (!confirm('Remettre tous les scores à zéro ?')) return;
-      document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-      updateTotals();
+      resetGame();
     });
+    document.getElementById('btn-play-again').addEventListener('click', resetGame);
 
-    updateTotals();
+    // ── Mise à jour du bandeau si renommage ───────────────────────
+    nameP1.addEventListener('input', () => { updateTotals(); updateTurnBar(); });
+    nameP2.addEventListener('input', () => { updateTotals(); updateTurnBar(); });
+
+    // ── Init ──────────────────────────────────────────────────────
+    resetGame();
   </script>
 </body>
 </html>
