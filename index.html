@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Yam">
+  <meta name="application-name" content="Yam">
+  <meta name="theme-color" content="#8f4e1d">
+  <meta name="description" content="Feuille de score Yam – 2 joueurs, calcul automatique">
+
+  <title>Yam – Feuille de score</title>
+
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Feuille%20de%20score%20Yam%22%2C%22short_name%22%3A%22Yam%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4efe6%22%2C%22theme_color%22%3A%22%238f4e1d%22%2C%22orientation%22%3A%22portrait%22%7D">
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgOS4xLWMwMDEgNzkuYTg3MzA3MywgMjAyMy8wNi8xOS0wNTowNTo1OSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDI1LjAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDk0NUJBNENBQTM5MTFFRThBQkVGQzlFQ0E1ODlFQUIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDk0NUJBNENBQTM5MTFFRThBQkVGQzlFQ0E1ODlFQUIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpEOTQ1QkE0OUFBMZKXMTFFOFVCRUZDOUVDQTU4OUVBQiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpEOTQ1QkE0OUFBMZKXMTFFOFVCRUZDOUVDQTU4OUVBQiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pjxzb21ldGhpbmcvPg==">
+
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────────── */
+    :root {
+      --bg:           #f4efe6;
+      --surface:      #fffaf2;
+      --border:       #d9c9ae;
+      --text:         #231d12;
+      --muted:        #7a6a52;
+      --accent:       #8f4e1d;
+      --accent-light: #f1dfc6;
+      --accent-dark:  #6b3a15;
+      --p1:           #1a5fb4;   /* bleu joueur 1 */
+      --p1-light:     #ddeaff;
+      --p2:           #a01c3d;   /* rouge joueur 2 */
+      --p2-light:     #ffe0e8;
+      --win:          #1e7e34;
+      --win-light:    #d4f7dc;
+      --radius-card:  20px;
+      --radius-btn:   14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-text-size-adjust: 100%;
+      padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .app-header {
+      background: var(--accent);
+      color: #fff;
+      padding: calc(.9rem + env(safe-area-inset-top, 0px)) 1.1rem .9rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.2);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .app-header .icon { font-size: 1.8rem; line-height: 1; }
+    .app-header h1   { font-size: 1.2rem; font-weight: 700; }
+    .app-header p    { font-size: 0.75rem; opacity: .8; }
+
+    /* ── Layout ─────────────────────────────────────────────────── */
+    main {
+      padding: .9rem;
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+    }
+
+    /* ── Scoreboard header (noms) ────────────────────────────────── */
+    .players-header {
+      display: grid;
+      grid-template-columns: 1fr 88px 88px;
+      align-items: center;
+      gap: .4rem;
+      padding: .5rem .9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: 0 2px 10px rgba(81,56,28,.07);
+    }
+    .players-header .ph-spacer { /* empty label column */ }
+
+    .player-name-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .15rem;
+    }
+    .player-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .p1 .player-dot { background: var(--p1); }
+    .p2 .player-dot { background: var(--p2); }
+
+    .player-name {
+      font-size: .82rem;
+      font-weight: 700;
+      text-align: center;
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px dashed var(--border);
+      padding: .15rem .2rem;
+      color: var(--text);
+      text-overflow: ellipsis;
+      cursor: text;
+    }
+    .player-name:focus {
+      outline: none;
+      border-bottom-color: var(--accent);
+    }
+    .p1 .player-name:focus { border-bottom-color: var(--p1); }
+    .p2 .player-name:focus { border-bottom-color: var(--p2); }
+
+    /* ── Card ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(81,56,28,.08);
+    }
+    .card-title {
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: .45rem .9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Score row ──────────────────────────────────────────────── */
+    .score-row {
+      display: grid;
+      grid-template-columns: 1fr 88px 88px;
+      align-items: center;
+      gap: .4rem;
+      padding: .5rem .9rem;
+      border-bottom: 1px solid #ede3d4;
+    }
+    .score-row:last-child { border-bottom: none; }
+
+    .score-row.total {
+      background: #faf4eb;
+      font-weight: 700;
+    }
+    .score-row.grand {
+      background: var(--accent-light);
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .row-label {
+      font-size: .88rem;
+    }
+    .row-label-text { line-height: 1.25; }
+    .row-hint {
+      display: block;
+      font-size: .67rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── Select ─────────────────────────────────────────────────── */
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 1.6rem 0 .6rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a07850' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") right .5rem center no-repeat;
+      appearance: none;
+      -webkit-appearance: none;
+      color: var(--text);
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+      text-align: center;
+    }
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(143,78,29,.15);
+    }
+    /* couleur par joueur au focus */
+    .col-p1 select:focus { border-color: var(--p1); box-shadow: 0 0 0 3px rgba(26,95,180,.15); }
+    .col-p2 select:focus { border-color: var(--p2); box-shadow: 0 0 0 3px rgba(160,28,61,.15); }
+
+    /* ── Output (totaux) ────────────────────────────────────────── */
+    output {
+      display: block;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      font-size: .95rem;
+      padding: .25rem 0;
+      border-radius: 8px;
+      transition: background .25s, color .25s;
+    }
+
+    /* leading / trailing highlight */
+    output.is-winning {
+      background: var(--win-light);
+      color: var(--win);
+    }
+    output.is-losing {
+      opacity: .6;
+    }
+
+    /* ── Grand total row specifics ─────────────────────────────── */
+    .score-row.grand output {
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: .3rem .2rem;
+    }
+    .score-row.grand output.is-winning {
+      background: var(--win-light);
+      color: var(--win);
+      border-radius: 10px;
+    }
+
+    /* ── Banner gagnant ────────────────────────────────────────── */
+    #winner-banner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .85rem 1rem;
+      border-radius: var(--radius-card);
+      font-weight: 700;
+      font-size: 1rem;
+      text-align: center;
+      background: var(--win-light);
+      border: 1.5px solid #a8e0b5;
+      color: var(--win);
+      animation: pop .3s ease;
+    }
+    #winner-banner.show { display: flex; }
+    @keyframes pop {
+      0%   { transform: scale(.92); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+
+    /* ── Reset button ───────────────────────────────────────────── */
+    .btn-reset {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
+      min-height: 50px;
+      background: #fff;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-btn);
+      font: inherit;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .15s, color .15s;
+    }
+    .btn-reset:active { background: var(--accent); color: #fff; }
+
+    /* ── Aide-mémoire ───────────────────────────────────────────── */
+    .memo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .45rem;
+    }
+    .memo-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .55rem .7rem;
+      display: flex;
+      flex-direction: column;
+      font-size: .8rem;
+    }
+    .memo-item strong { font-weight: 700; margin-bottom: .1rem; }
+    .memo-pts { font-weight: 800; color: var(--accent); }
+
+    /* ── Icônes dés ─────────────────────────────────────────────── */
+    .row-label {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+    }
+    .row-label-text { line-height: 1.3; }
+    .dice-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      max-width: 82px; /* force 5 dés sur 2 lignes si besoin */
+    }
+    .dice-group svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    /* Pour les suites (5 dés) on réduit un peu */
+    .dice-group.suite svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    @media (max-width: 360px) {
+      .score-row   { grid-template-columns: 1fr 76px 76px; gap: .25rem; padding: .45rem .6rem; }
+      .players-header { grid-template-columns: 1fr 76px 76px; }
+      select       { font-size: .82rem; }
+      .dice-group svg      { width: 18px; height: 18px; }
+      .dice-group.suite svg { width: 14px; height: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+    <!-- SVG dés réutilisables -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <defs>
+        <!-- Base dé : fond blanc, coins arrondis, bordure -->
+        <!-- Face 1 -->
+        <symbol id="die-1" viewBox="0 0 24 24">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="2.4" fill="#1a1a1a"/>
+        </symbol>
+        <!-- Face 2 -->
+        <symbol id="die-2" viewBox="0 0 24 24">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="7.5" cy="7.5" r="2.2" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="16.5" r="2.2" fill="#1a1a1a"/>
+        </symbol>
+        <!-- Face 3 -->
+        <symbol id="die-3" viewBox="0 0 24 24">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="7.5" cy="7.5" r="2.2" fill="#1a1a1a"/>
+          <circle cx="12"  cy="12"  r="2.2" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="16.5" r="2.2" fill="#1a1a1a"/>
+        </symbol>
+        <!-- Face 4 -->
+        <symbol id="die-4" viewBox="0 0 24 24">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="7.5" cy="7.5"  r="2.2" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="7.5" r="2.2" fill="#1a1a1a"/>
+          <circle cx="7.5" cy="16.5" r="2.2" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="16.5" r="2.2" fill="#1a1a1a"/>
+        </symbol>
+        <!-- Face 5 -->
+        <symbol id="die-5" viewBox="0 0 24 24">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="7.5" cy="7.5"  r="2.1" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="7.5" r="2.1" fill="#1a1a1a"/>
+          <circle cx="12"   cy="12"  r="2.1" fill="#1a1a1a"/>
+          <circle cx="7.5" cy="16.5" r="2.1" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="16.5" r="2.1" fill="#1a1a1a"/>
+        </symbol>
+        <!-- Face 6 -->
+        <symbol id="die-6" viewBox="0 0 24 24">
+          <rect x="1" y="1" width="22" height="22" rx="4" fill="#fff" stroke="#bbb" stroke-width="1.5"/>
+          <circle cx="7.5" cy="6.5"  r="2.1" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="6.5" r="2.1" fill="#1a1a1a"/>
+          <circle cx="7.5" cy="12"   r="2.1" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="12"  r="2.1" fill="#1a1a1a"/>
+          <circle cx="7.5" cy="17.5" r="2.1" fill="#1a1a1a"/>
+          <circle cx="16.5" cy="17.5" r="2.1" fill="#1a1a1a"/>
+        </symbol>
+      </defs>
+    </svg>
+
+    <header class="app-header">
+    <span class="icon" aria-hidden="true">🎲</span>
+    <div>
+      <h1>Feuille de score Yam</h1>
+      <p>2 joueurs · scores en temps réel</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── Noms des joueurs ──────────────────────────────────────── -->
+    <div class="players-header" role="group" aria-label="Noms des joueurs">
+      <div class="ph-spacer"></div>
+      <div class="player-name-wrap p1">
+        <span class="player-dot" aria-hidden="true"></span>
+        <input class="player-name" id="name-p1" type="text" value="Joueur 1"
+               maxlength="14" aria-label="Nom du joueur 1" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="player-name-wrap p2">
+        <span class="player-dot" aria-hidden="true"></span>
+        <input class="player-name" id="name-p2" type="text" value="Joueur 2"
+               maxlength="14" aria-label="Nom du joueur 2" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <!-- ── Partie supérieure ─────────────────────────────────────── -->
+    <section class="card" aria-labelledby="upper-title">
+      <div class="card-title" id="upper-title">Partie supérieure</div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group" aria-hidden="true">
+            <svg><use href="#die-1"/></svg>
+          </span>
+          <span class="row-label-text">Nombre de 1 <span class="row-hint">×1 pt</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 1">
+            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 1">
+            <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group" aria-hidden="true">
+            <svg><use href="#die-2"/></svg>
+          </span>
+          <span class="row-label-text">Nombre de 2 <span class="row-hint">×2 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 2">
+            <option>0</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 2">
+            <option>0</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group" aria-hidden="true">
+            <svg><use href="#die-3"/></svg>
+          </span>
+          <span class="row-label-text">Nombre de 3 <span class="row-hint">×3 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 3">
+            <option>0</option><option>3</option><option>6</option><option>9</option><option>12</option><option>15</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 3">
+            <option>0</option><option>3</option><option>6</option><option>9</option><option>12</option><option>15</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group" aria-hidden="true">
+            <svg><use href="#die-4"/></svg>
+          </span>
+          <span class="row-label-text">Nombre de 4 <span class="row-hint">×4 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 4">
+            <option>0</option><option>4</option><option>8</option><option>12</option><option>16</option><option>20</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 4">
+            <option>0</option><option>4</option><option>8</option><option>12</option><option>16</option><option>20</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group" aria-hidden="true">
+            <svg><use href="#die-5"/></svg>
+          </span>
+          <span class="row-label-text">Nombre de 5 <span class="row-hint">×5 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 5">
+            <option>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 5">
+            <option>0</option><option>5</option><option>10</option><option>15</option><option>20</option><option>25</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group" aria-hidden="true">
+            <svg><use href="#die-6"/></svg>
+          </span>
+          <span class="row-label-text">Nombre de 6 <span class="row-hint">×6 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="upper" aria-label="J1 – Nombre de 6">
+            <option>0</option><option>6</option><option>12</option><option>18</option><option>24</option><option>30</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="upper" aria-label="J2 – Nombre de 6">
+            <option>0</option><option>6</option><option>12</option><option>18</option><option>24</option><option>30</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row total">
+        <span class="row-label">Total partiel</span>
+        <output id="upper-p1" aria-live="polite">0</output>
+        <output id="upper-p2" aria-live="polite">0</output>
+      </div>
+    </section>
+
+    <!-- ── Combinaisons ──────────────────────────────────────────── -->
+    <section class="card" aria-labelledby="lower-title">
+      <div class="card-title" id="lower-title">Combinaisons</div>
+
+      <div class="score-row">
+        <span class="row-label">Brelan <span class="row-hint">3 dés identiques</span></span>
+        <div class="col-p1">
+          <select data-player="1" data-group="lower" aria-label="J1 – Brelan">
+            <option>0</option><option>25</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="lower" aria-label="J2 – Brelan">
+            <option>0</option><option>25</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group suite" aria-hidden="true">
+            <svg><use href="#die-1"/></svg>
+            <svg><use href="#die-2"/></svg>
+            <svg><use href="#die-3"/></svg>
+            <svg><use href="#die-4"/></svg>
+            <svg><use href="#die-5"/></svg>
+          </span>
+          <span class="row-label-text">Petite suite <span class="row-hint">25 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="lower" aria-label="J1 – Petite suite">
+            <option>0</option><option>25</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="lower" aria-label="J2 – Petite suite">
+            <option>0</option><option>25</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">
+          <span class="dice-group suite" aria-hidden="true">
+            <svg><use href="#die-2"/></svg>
+            <svg><use href="#die-3"/></svg>
+            <svg><use href="#die-4"/></svg>
+            <svg><use href="#die-5"/></svg>
+            <svg><use href="#die-6"/></svg>
+          </span>
+          <span class="row-label-text">Grande suite <span class="row-hint">25 pts</span></span>
+        </span>
+        <div class="col-p1">
+          <select data-player="1" data-group="lower" aria-label="J1 – Grande suite">
+            <option>0</option><option>25</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="lower" aria-label="J2 – Grande suite">
+            <option>0</option><option>25</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">Full <span class="row-hint">brelan + paire</span></span>
+        <div class="col-p1">
+          <select data-player="1" data-group="lower" aria-label="J1 – Full">
+            <option>0</option><option>30</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="lower" aria-label="J2 – Full">
+            <option>0</option><option>30</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">Carré <span class="row-hint">4 dés identiques</span></span>
+        <div class="col-p1">
+          <select data-player="1" data-group="lower" aria-label="J1 – Carré">
+            <option>0</option><option>40</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="lower" aria-label="J2 – Carré">
+            <option>0</option><option>40</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row">
+        <span class="row-label">Yam ! <span class="row-hint">5 dés identiques</span></span>
+        <div class="col-p1">
+          <select data-player="1" data-group="lower" aria-label="J1 – Yam">
+            <option>0</option><option>50</option>
+          </select>
+        </div>
+        <div class="col-p2">
+          <select data-player="2" data-group="lower" aria-label="J2 – Yam">
+            <option>0</option><option>50</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="score-row total">
+        <span class="row-label">Total combi.</span>
+        <output id="lower-p1" aria-live="polite">0</output>
+        <output id="lower-p2" aria-live="polite">0</output>
+      </div>
+    </section>
+
+    <!-- ── Total général ─────────────────────────────────────────── -->
+    <div class="card">
+      <div class="score-row grand">
+        <span class="row-label">🏆 Total général</span>
+        <output id="grand-p1" aria-live="polite">0</output>
+        <output id="grand-p2" aria-live="polite">0</output>
+      </div>
+    </div>
+
+    <!-- ── Bandeau gagnant ──────────────────────────────────────── -->
+    <div id="winner-banner" role="status" aria-live="polite"></div>
+
+    <!-- ── Reset ────────────────────────────────────────────────── -->
+    <button class="btn-reset" id="btn-reset" type="button">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      Nouvelle partie
+    </button>
+
+    <!-- ── Aide-mémoire ──────────────────────────────────────────── -->
+    <section aria-label="Aide-mémoire des combinaisons">
+      <div style="background:var(--accent-light);color:var(--accent-dark);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.45rem .9rem;border:1px solid var(--border);border-bottom:none;border-radius:14px 14px 0 0">Aide-mémoire</div>
+      <div class="memo-grid" style="border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;overflow:hidden;background:var(--surface);padding:.65rem">
+        <div class="memo-item"><strong>Brelan</strong><span class="memo-pts">25 pts</span></div>
+        <div class="memo-item"><strong>Pte suite</strong><span class="memo-pts">25 pts</span></div>
+        <div class="memo-item"><strong>Gde suite</strong><span class="memo-pts">25 pts</span></div>
+        <div class="memo-item"><strong>Full</strong><span class="memo-pts">30 pts</span></div>
+        <div class="memo-item"><strong>Carré</strong><span class="memo-pts">40 pts</span></div>
+        <div class="memo-item"><strong>Yam !</strong><span class="memo-pts">50 pts</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ── Références DOM ───────────────────────────────────────────
+    const nameP1   = document.getElementById('name-p1');
+    const nameP2   = document.getElementById('name-p2');
+    const upperP1  = document.getElementById('upper-p1');
+    const upperP2  = document.getElementById('upper-p2');
+    const lowerP1  = document.getElementById('lower-p1');
+    const lowerP2  = document.getElementById('lower-p2');
+    const grandP1  = document.getElementById('grand-p1');
+    const grandP2  = document.getElementById('grand-p2');
+    const banner   = document.getElementById('winner-banner');
+
+    // ── Calcul ───────────────────────────────────────────────────
+    function sumPlayer(player, group) {
+      return [...document.querySelectorAll(
+        `select[data-player="${player}"][data-group="${group}"]`
+      )].reduce((acc, s) => acc + Number(s.value), 0);
+    }
+
+    function highlight(outA, outB) {
+      const a = Number(outA.value);
+      const b = Number(outB.value);
+      outA.classList.toggle('is-winning', a > b);
+      outA.classList.toggle('is-losing',  a < b);
+      outB.classList.toggle('is-winning', b > a);
+      outB.classList.toggle('is-losing',  b < a);
+    }
+
+    function updateTotals() {
+      const u1 = sumPlayer(1, 'upper'), u2 = sumPlayer(2, 'upper');
+      const l1 = sumPlayer(1, 'lower'), l2 = sumPlayer(2, 'lower');
+      const g1 = u1 + l1,              g2 = u2 + l2;
+
+      upperP1.value = u1; upperP2.value = u2;
+      lowerP1.value = l1; lowerP2.value = l2;
+      grandP1.value = g1; grandP2.value = g2;
+
+      highlight(upperP1, upperP2);
+      highlight(lowerP1, lowerP2);
+      highlight(grandP1, grandP2);
+
+      // Bandeau gagnant — s'affiche seulement si au moins un score saisi
+      const anyFilled = [...document.querySelectorAll('select')]
+        .some(s => s.value !== '0');
+
+      if (anyFilled && g1 !== g2) {
+        const winner = g1 > g2 ? nameP1.value : nameP2.value;
+        const diff   = Math.abs(g1 - g2);
+        banner.textContent = `🥇 ${winner} mène avec ${Math.max(g1,g2)} pts (+${diff})`;
+        banner.classList.add('show');
+      } else {
+        banner.classList.remove('show');
+        if (anyFilled && g1 === g2) {
+          banner.textContent = `🤝 Égalité – ${g1} pts chacun`;
+          banner.classList.add('show');
+        }
+      }
+    }
+
+    // ── Événements ───────────────────────────────────────────────
+    document.querySelectorAll('select').forEach(s => {
+      s.addEventListener('change', updateTotals);
+    });
+
+    // Mise à jour du bandeau si on renomme un joueur
+    nameP1.addEventListener('input', updateTotals);
+    nameP2.addEventListener('input', updateTotals);
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      if (!confirm('Remettre tous les scores à zéro ?')) return;
+      document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+      updateTotals();
+    });
+
+    updateTotals();
+  </script>
+</body>
+</html>
