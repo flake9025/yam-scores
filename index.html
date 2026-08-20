@@ -965,6 +965,12 @@
         </div>
       </div>
 
+      <div class="score-row">
+        <span class="row-label">Prime <span class="row-hint">≥ 63 pts en haut</span></span>
+        <output id="bonus-p1" aria-live="polite">–</output>
+        <output id="bonus-p2" aria-live="polite">–</output>
+      </div>
+
       <div class="score-row total">
         <span class="row-label">Total partiel</span>
         <output id="upper-p1" aria-live="polite">0</output>
@@ -977,15 +983,15 @@
       <div class="card-title" id="lower-title">Combinaisons</div>
 
       <div class="score-row">
-        <span class="row-label">Brelan <span class="row-hint">3 dés identiques</span></span>
+        <span class="row-label">Brelan <span class="row-hint">3 dés identiques + les 2 autres</span></span>
         <div class="col-p1">
           <select data-player="1" data-group="lower" aria-label="J1 – Brelan">
-            <option value="" selected>–</option><option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
           </select>
         </div>
         <div class="col-p2">
           <select data-player="2" data-group="lower" aria-label="J2 – Brelan">
-            <option value="" selected>–</option><option>0</option><option>25</option>
+            <option value="" selected>–</option><option>0</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
           </select>
         </div>
       </div>
@@ -1151,7 +1157,7 @@
     <section aria-label="Aide-mémoire des combinaisons">
       <div style="background:var(--accent-light);color:var(--accent-dark);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.45rem .9rem;border:1px solid var(--border);border-bottom:none;border-radius:14px 14px 0 0">Aide-mémoire</div>
       <div class="memo-grid" style="border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;overflow:hidden;background:var(--surface);padding:.65rem">
-        <div class="memo-item"><strong>Brelan</strong><span class="memo-pts">25 pts</span></div>
+        <div class="memo-item"><strong>Brelan</strong><span class="memo-pts">5–30 pts</span></div>
         <div class="memo-item"><strong>Pte suite</strong><span class="memo-pts">25 pts</span></div>
         <div class="memo-item"><strong>Gde suite</strong><span class="memo-pts">25 pts</span></div>
         <div class="memo-item"><strong>Full</strong><span class="memo-pts">30 pts</span></div>
@@ -1168,6 +1174,8 @@
     const nameP2        = document.getElementById('name-p2');
     const upperP1       = document.getElementById('upper-p1');
     const upperP2       = document.getElementById('upper-p2');
+    const bonusP1       = document.getElementById('bonus-p1');
+    const bonusP2       = document.getElementById('bonus-p2');
     const lowerP1       = document.getElementById('lower-p1');
     const lowerP2       = document.getElementById('lower-p2');
     const grandP1       = document.getElementById('grand-p1');
@@ -1234,9 +1242,20 @@
     function updateTotals() {
       allSelects().forEach(s => s.classList.toggle('empty', s.value === ''));
 
-      const u1 = sumPlayer(1,'upper'), u2 = sumPlayer(2,'upper');
+      const rawU1 = sumPlayer(1,'upper'), rawU2 = sumPlayer(2,'upper');
+      const b1 = rawU1 >= 63 ? 37 : 0;
+      const b2 = rawU2 >= 63 ? 37 : 0;
+      const u1 = rawU1 + b1, u2 = rawU2 + b2;
       const l1 = sumPlayer(1,'lower'), l2 = sumPlayer(2,'lower');
       const g1 = u1+l1,               g2 = u2+l2;
+
+      // Prime : afficher seulement si au moins une case supérieure remplie
+      const anyUpper1 = [...document.querySelectorAll('select[data-player="1"][data-group="upper"]')].some(s => s.value !== '');
+      const anyUpper2 = [...document.querySelectorAll('select[data-player="2"][data-group="upper"]')].some(s => s.value !== '');
+      bonusP1.value = anyUpper1 ? (b1 > 0 ? '+37' : `${rawU1}/63`) : '–';
+      bonusP2.value = anyUpper2 ? (b2 > 0 ? '+37' : `${rawU2}/63`) : '–';
+      bonusP1.classList.toggle('is-winning', b1 > 0);
+      bonusP2.classList.toggle('is-winning', b2 > 0);
 
       upperP1.value = u1; upperP2.value = u2;
       lowerP1.value = l1; lowerP2.value = l2;
@@ -1291,9 +1310,10 @@
     function nextTurn() {
       currentPlayer = currentPlayer === 1 ? 2 : 1;
       filledThisTurn = 0;
+      // Réinitialiser les contraintes dés du nouveau joueur actif
+      resetDiceConstraints(currentPlayer);
       applyLocks();
       updateTurnBar();
-      // Scroll en haut pour que le joueur suivant voie bien son tour
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1335,6 +1355,8 @@
         s.value = '';
         s.selectedIndex = 0;
         s.disabled = false;
+        // Réinitialiser toutes les options cachées
+        [...s.options].forEach(opt => { opt.hidden = false; opt.disabled = false; });
       });
       document.querySelectorAll('.col-p1, .col-p2').forEach(d => d.classList.remove('locked'));
       currentPlayer  = 1;
@@ -1500,13 +1522,14 @@
           rollKeepHint.textContent = '👆 Touche un dé pour le garder';
           btnRollAgain.textContent = `🎲 Relancer (${MAX_ROLLS - rollCount} restant${MAX_ROLLS - rollCount > 1 ? 's' : ''})`;
           btnRollAgain.disabled = false;
-          // rendre les dés cliquables
           dieDivs.forEach(d => d.style.cursor = 'pointer');
         } else {
-          rollKeepHint.textContent = '3 lancers utilisés – fin du tour de dés';
+          rollKeepHint.textContent = '3 lancers utilisés – ferme pour voir tes cases';
           btnRollAgain.disabled = true;
           btnRollAgain.textContent = '🎲 Relancer';
           dieDivs.forEach(d => d.style.cursor = 'default');
+          // Appliquer les contraintes dès le 3e lancer
+          applyDiceConstraints(diceValues, currentPlayer);
         }
       }, delay);
 
@@ -1546,10 +1569,110 @@
 
     btnRollAgain.addEventListener('click', doRoll);
 
-    btnRollClose.addEventListener('click', () => rollOverlay.classList.remove('show'));
-    rollOverlay.addEventListener('click', e => {
-      if (e.target === rollOverlay) rollOverlay.classList.remove('show');
+    btnRollClose.addEventListener('click', () => {
+      // Appliquer les contraintes selon le résultat final des dés
+      if (rollCount > 0 && diceValues.some(v => v > 0)) {
+        applyDiceConstraints(diceValues, currentPlayer);
+      }
+      rollOverlay.classList.remove('show');
     });
+    rollOverlay.addEventListener('click', e => {
+      if (e.target !== rollOverlay) return;
+      if (rollCount > 0 && diceValues.some(v => v > 0)) {
+        applyDiceConstraints(diceValues, currentPlayer);
+      }
+      rollOverlay.classList.remove('show');
+    });
+
+    // ── Contraintes dés → cases disponibles ──────────────────────
+    // Calcule quelles combinaisons sont réalisables avec les 5 dés,
+    // et désactive les options impossibles (sauf 0 toujours disponible).
+    function applyDiceConstraints(dice, player) {
+      const sorted = [...dice].sort((a,b) => a-b);
+      const counts = {};
+      dice.forEach(v => counts[v] = (counts[v]||0)+1);
+      const vals   = Object.keys(counts).map(Number);
+      const maxCnt = Math.max(...Object.values(counts));
+      const sum    = dice.reduce((a,b)=>a+b,0);
+
+      // Combinaisons réalisables
+      const canBrelan     = maxCnt >= 3;
+      const canCarre      = maxCnt >= 4;
+      const canYam        = maxCnt === 5;
+      const canFull       = maxCnt >= 3 && vals.length === 2; // ex: 3+2
+      const canPetiteSuite = JSON.stringify(sorted) === JSON.stringify([1,2,3,4,5]);
+      const canGrandeSuite = JSON.stringify(sorted) === JSON.stringify([2,3,4,5,6]);
+
+      // Score brelan = somme des 5 dés si brelan valide
+      const brelanScore = canBrelan ? sum : null;
+
+      // Pour chaque case non encore jouée du joueur, filtrer les options
+      const selects = selectsOf(player).filter(s => !s.disabled);
+
+      selects.forEach(s => {
+        const label = s.getAttribute('aria-label') || '';
+
+        // Partie supérieure : chaque face
+        const upperMatch = label.match(/Nombre de (\d)/);
+        if (upperMatch) {
+          const face = parseInt(upperMatch[1]);
+          const faceCount = counts[face] || 0;
+          const validScore = faceCount * face;
+          filterOptions(s, v => v === 0 || v === validScore);
+          return;
+        }
+
+        if (label.includes('Brelan')) {
+          // Valeurs valides : 0 + score exact (somme des 5 dés si brelan)
+          if (canBrelan) filterOptions(s, v => v === 0 || v === sum);
+          else           filterOptions(s, v => v === 0);
+          return;
+        }
+        if (label.includes('Petite suite')) {
+          filterOptions(s, v => v === 0 || (canPetiteSuite && v === 25));
+          return;
+        }
+        if (label.includes('Grande suite')) {
+          filterOptions(s, v => v === 0 || (canGrandeSuite && v === 25));
+          return;
+        }
+        if (label.includes('Full')) {
+          filterOptions(s, v => v === 0 || (canFull && v === 30));
+          return;
+        }
+        if (label.includes('Carré')) {
+          filterOptions(s, v => v === 0 || (canCarre && v === 40));
+          return;
+        }
+        if (label.includes('Yam')) {
+          filterOptions(s, v => v === 0 || (canYam && v === 50));
+          return;
+        }
+      });
+    }
+
+    // Masque les options qui ne passent pas le filtre,
+    // mais garde toujours "–" et "0".
+    function filterOptions(select, keepFn) {
+      [...select.options].forEach(opt => {
+        if (opt.value === '') return; // toujours garder "–"
+        const v = Number(opt.value);
+        opt.hidden   = !keepFn(v);
+        opt.disabled = !keepFn(v);
+      });
+      // Si la valeur actuellement sélectionnée est cachée, repasser à "–"
+      if (select.value !== '' && select.options[select.selectedIndex]?.hidden) {
+        select.value = '';
+        select.selectedIndex = 0;
+      }
+    }
+
+    // Réinitialiser les contraintes (nouvelle partie ou reset)
+    function resetDiceConstraints(player) {
+      selectsOf(player).forEach(s => {
+        [...s.options].forEach(opt => { opt.hidden = false; opt.disabled = false; });
+      });
+    }
 
     // ── Init ──────────────────────────────────────────────────────
     resetGame();

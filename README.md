@@ -57,13 +57,13 @@ La partie se termine quand toutes les cases des deux joueurs sont remplies (12 c
 | Nombre de 5  | 5 pts par dé montrant 5  | 5-5-5-5-5 → 25 pts   |
 | Nombre de 6  | 6 pts par dé montrant 6  | 6-6-1-2-3 → 12 pts   |
 
-> Si le joueur ne peut ou ne veut pas remplir une case, il inscrit **0**.
+Si le **total de la partie supérieure atteint 63 pts ou plus**, une **prime de +37 pts** est automatiquement ajoutée au total partiel.
 
 ### Combinaisons
 
 | Combinaison  | Score   | Condition                        | Exemple              |
 |--------------|---------|----------------------------------|----------------------|
-| Brelan       | 25 pts  | Au moins 3 dés identiques        | 4-4-4-1-2            |
+| Brelan       | 5–30 pts | Somme des 5 dés si 3 identiques  | 4-4-4-1-2 → 15 pts   |
 | Petite suite | 25 pts  | Les 5 dés forment 1-2-3-4-5      | 1-2-3-4-5            |
 | Grande suite | 25 pts  | Les 5 dés forment 2-3-4-5-6      | 2-3-4-5-6            |
 | Full         | 30 pts  | Un brelan + une paire            | 3-3-3-6-6            |
