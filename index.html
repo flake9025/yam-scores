@@ -13,8 +13,9 @@
 
   <title>Yam – Feuille de score</title>
 
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Feuille%20de%20score%20Yam%22%2C%22short_name%22%3A%22Yam%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f4efe6%22%2C%22theme_color%22%3A%22%238f4e1d%22%2C%22orientation%22%3A%22portrait%22%7D">
-  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgOS4xLWMwMDEgNzkuYTg3MzA3MywgMjAyMy8wNi8xOS0wNTowNTo1OSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDI1LjAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDk0NUJBNENBQTM5MTFFRThBQkVGQzlFQ0E1ODlFQUIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDk0NUJBNENBQTM5MTFFRThBQkVGQzlFQ0E1ODlFQUIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpEOTQ1QkE0OUFBMZKXMTFFOFVCRUZDOUVDQTU4OUVBQiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpEOTQ1QkE0OUFBMZKXMTFFOFVCRUZDOUVDQTU4OUVBQiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pjxzb21ldGhpbmcvPg==">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
 
   <style>
     /* ── Tokens ─────────────────────────────────────────────────── */
@@ -385,32 +386,97 @@
       white-space: nowrap;
     }
 
-    /* ── Bouton Valider tour ─────────────────────────────────────── */
-    #btn-validate {
-      display: flex;
-      align-items: center;
+    /* ── Bottom sheet confirmation de tour ──────────────────────── */
+    #confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      align-items: flex-end;
       justify-content: center;
-      gap: .5rem;
+      background: rgba(35,29,18,.45);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    #confirm-overlay.show { display: flex; }
+
+    #confirm-sheet {
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
       width: 100%;
-      min-height: 52px;
+      max-width: 560px;
+      box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+      animation: slide-up .25s cubic-bezier(.32,1,.42,1);
+    }
+    @keyframes slide-up {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .confirm-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto .9rem;
+    }
+    .confirm-who {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: .2rem;
+    }
+    .confirm-who.p1 { color: var(--p1); }
+    .confirm-who.p2 { color: var(--p2); }
+
+    .confirm-question {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: .25rem;
+      line-height: 1.35;
+    }
+    .confirm-detail {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 1.1rem;
+    }
+
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .65rem;
+    }
+    .btn-confirm-no {
+      min-height: 50px;
+      background: #fff;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-btn);
+      font: inherit;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .15s;
+    }
+    .btn-confirm-no:active { background: #f0ebe2; }
+
+    .btn-confirm-yes {
+      min-height: 50px;
       border: none;
       border-radius: var(--radius-btn);
       font: inherit;
-      font-size: 1rem;
+      font-size: .95rem;
       font-weight: 700;
+      color: #fff;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: background .15s, transform .1s;
-      color: #fff;
+      transition: opacity .15s;
     }
-    #btn-validate.turn-p1 { background: var(--p1); }
-    #btn-validate.turn-p2 { background: var(--p2); }
-    #btn-validate:active   { transform: scale(.97); }
-    #btn-validate:disabled {
-      opacity: .4;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .btn-confirm-yes:active { opacity: .85; }
+    .btn-confirm-yes.p1 { background: var(--p1); }
+    .btn-confirm-yes.p2 { background: var(--p2); }
 
     /* ── Modale fin de partie ───────────────────────────────────── */
     #end-overlay {
@@ -828,17 +894,22 @@
       </div>
     </div>
 
+    <!-- ── Bottom sheet confirmation ───────────────────────────── -->
+    <div id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-question">
+      <div id="confirm-sheet">
+        <div class="confirm-handle" aria-hidden="true"></div>
+        <div class="confirm-who" id="confirm-who"></div>
+        <div class="confirm-question" id="confirm-question"></div>
+        <div class="confirm-detail"  id="confirm-detail"></div>
+        <div class="confirm-actions">
+          <button class="btn-confirm-no"  id="btn-confirm-no"  type="button">↩ Changer</button>
+          <button class="btn-confirm-yes" id="btn-confirm-yes" type="button">Valider ✓</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Bandeau score en cours ───────────────────────────────── -->
     <div id="winner-banner" role="status" aria-live="polite"></div>
-
-    <!-- ── Valider le tour ──────────────────────────────────────── -->
-    <button id="btn-validate" class="turn-p1" type="button" disabled>
-      Valider mon tour
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-    </button>
 
     <!-- ── Reset ────────────────────────────────────────────────── -->
     <button class="btn-reset" id="btn-reset" type="button">
@@ -879,7 +950,12 @@
     const turnBar       = document.getElementById('turn-bar');
     const turnLabel     = document.getElementById('turn-label');
     const turnProgress  = document.getElementById('turn-progress');
-    const btnValidate   = document.getElementById('btn-validate');
+    const confirmOverlay  = document.getElementById('confirm-overlay');
+    const confirmWho      = document.getElementById('confirm-who');
+    const confirmQuestion = document.getElementById('confirm-question');
+    const confirmDetail   = document.getElementById('confirm-detail');
+    const btnConfirmYes   = document.getElementById('btn-confirm-yes');
+    const btnConfirmNo    = document.getElementById('btn-confirm-no');
     const endOverlay    = document.getElementById('end-overlay');
     const endSub        = document.getElementById('end-sub');
     const endBoxP1      = document.getElementById('end-box-p1');
@@ -977,16 +1053,10 @@
     function updateTurnBar() {
       const p    = currentPlayer;
       const done = filledCount(p);
-      turnBar.className   = `turn-p${p}`;
-      btnValidate.className = `turn-p${p}`;
+      turnBar.className     = `turn-p${p}`;
       turnLabel.textContent = `🎲 Au tour de ${name(p)}`;
       turnProgress.textContent = `${done} / ${TOTAL_CASES} cases`;
 
-      // Le bouton Valider est actif seulement si le joueur a rempli
-      // au moins 1 case DE PLUS qu'au début de son tour
-      btnValidate.disabled = (filledThisTurn === 0);
-
-      // Classe sur le score area pour le surlignage CSS
       scoreArea.classList.toggle('turn-p1', p === 1);
       scoreArea.classList.toggle('turn-p2', p === 2);
     }
@@ -1049,52 +1119,86 @@
       updateTurnBar();
     }
 
+    // ── Bottom sheet : afficher ───────────────────────────────────
+    // On garde une référence au select en cours de confirmation
+    let pendingSelect = null;
+
+    function showConfirm(s, rowLabel, scoreValue) {
+      pendingSelect = s;
+      const p = currentPlayer;
+      confirmWho.textContent      = name(p);
+      confirmWho.className        = `confirm-who p${p}`;
+      confirmQuestion.textContent = `Valider "${rowLabel}" ?`;
+      confirmDetail.textContent   = `Score enregistré : ${scoreValue} pt${scoreValue > 1 ? 's' : ''}`;
+      btnConfirmYes.className     = `btn-confirm-yes p${p}`;
+      confirmOverlay.classList.add('show');
+    }
+
+    function hideConfirm() {
+      confirmOverlay.classList.remove('show');
+      pendingSelect = null;
+    }
+
     // ── Événements selects ────────────────────────────────────────
     allSelects().forEach(s => {
       s.addEventListener('change', () => {
         const p = parseInt(s.dataset.player);
-        // On ne réagit qu'aux selects du joueur actif
         if (p !== currentPlayer) return;
 
-        if (s.value !== '') {
-          // Le joueur a choisi une valeur sur cette case :
-          // remettre toutes ses AUTRES cases vides à "–"
-          // (une seule case en cours à la fois, mais il peut changer d'avis)
-          selectsOf(currentPlayer).forEach(other => {
-            if (other !== s && other.value === '') {
-              // déjà vide, rien à faire
-            } else if (other !== s && !other.disabled) {
-              // case non encore validée d'un tour précédent → impossible
-              // (les cases déjà jouées sont disabled, donc on ne les touche pas)
-            }
-          });
-          // Retirer la valeur des autres cases non encore verrouillées
-          selectsOf(currentPlayer).forEach(other => {
-            if (other !== s && !other.disabled) {
-              other.value = '';
-              other.selectedIndex = 0;
-            }
-          });
-          filledThisTurn = 1;
-        } else {
-          // Le joueur a repassé sa case à "–" : annulation
-          filledThisTurn = 0;
+        if (s.value === '') {
+          // Annulation manuelle → rien à faire
+          updateTotals();
+          updateTurnBar();
+          return;
         }
+
+        // Une valeur a été choisie → mettre les autres cases vides à "–"
+        // (une seule case active à la fois)
+        selectsOf(currentPlayer).forEach(other => {
+          if (other !== s && !other.disabled) {
+            other.value = '';
+            other.selectedIndex = 0;
+          }
+        });
 
         updateTotals();
         updateTurnBar();
+
+        // Trouver le label de la ligne pour la bottom sheet
+        const row   = s.closest('.score-row');
+        const label = row ? (row.querySelector('.row-label-text') || row.querySelector('.row-label'))?.textContent?.trim().split('\n')[0].trim() : '?';
+        showConfirm(s, label, s.value);
       });
     });
 
-    // ── Valider le tour ───────────────────────────────────────────
-    btnValidate.addEventListener('click', () => {
-      // Verrouiller définitivement la case choisie ce tour
-      selectsOf(currentPlayer).forEach(s => {
-        if (s.value !== '') s.disabled = true;
-      });
+    // ── Oui → valider le tour ─────────────────────────────────────
+    btnConfirmYes.addEventListener('click', () => {
+      if (!pendingSelect) return;
+      pendingSelect.disabled = true; // verrouillage définitif
+      filledThisTurn = 1;
+      hideConfirm();
       if (checkEndGame()) return;
       nextTurn();
     });
+
+    // ── Non → annuler le choix ────────────────────────────────────
+    btnConfirmNo.addEventListener('click', () => {
+      if (pendingSelect) {
+        pendingSelect.value = '';
+        pendingSelect.selectedIndex = 0;
+      }
+      hideConfirm();
+      updateTotals();
+      updateTurnBar();
+    });
+
+    // Tap sur le fond pour annuler
+    confirmOverlay.addEventListener('click', e => {
+      if (e.target === confirmOverlay) btnConfirmNo.click();
+    });
+
+    // ── Valider le tour ───────────────────────────────────────────
+    // (supprimé — remplacé par la bottom sheet)
 
     // ── Nouvelle partie ───────────────────────────────────────────
     document.getElementById('btn-reset').addEventListener('click', () => {

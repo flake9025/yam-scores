@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- fond -->
+  <rect width="512" height="512" rx="112" fill="#8f4e1d"/>
+  <!-- reflet subtil en haut -->
+  <rect width="512" height="256" rx="112" fill="url(#shine)" opacity="0.18"/>
+  <defs>
+    <radialGradient id="shine" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- dé blanc -->
+  <rect x="96" y="76" width="320" height="320" rx="64" fill="#fff"/>
+  <!-- ombre douce sous le dé -->
+  <rect x="96" y="76" width="320" height="320" rx="64" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="4"/>
+  <!-- face 5 : coin haut-gauche -->
+  <circle cx="180" cy="160" r="28" fill="#8f4e1d"/>
+  <!-- face 5 : coin haut-droit -->
+  <circle cx="332" cy="160" r="28" fill="#8f4e1d"/>
+  <!-- face 5 : centre -->
+  <circle cx="256" cy="236" r="28" fill="#8f4e1d"/>
+  <!-- face 5 : coin bas-gauche -->
+  <circle cx="180" cy="312" r="28" fill="#8f4e1d"/>
+  <!-- face 5 : coin bas-droit -->
+  <circle cx="332" cy="312" r="28" fill="#8f4e1d"/>
+  <!-- texte YAM -->
+  <text x="256" y="454" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="88" fill="#fff" text-anchor="middle" letter-spacing="8">YAM</text>
+</svg>
